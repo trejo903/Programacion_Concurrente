@@ -3,6 +3,8 @@ import java.util.List;
 import java.util.Scanner;
 
 
+//coopel mejora tu vida 
+
 class Product {
     private int id;
     private String name;
@@ -49,7 +51,7 @@ class User {
         return cart;
     }
 }
-
+//carrito
 class Cart {
     private List<Product> products;
 
@@ -61,12 +63,14 @@ class Cart {
         products.add(product);
         System.out.println("Producto añadido al carrito: " + product.getName());
     }
-
+//ver lo que hay en el carrito
     public void viewCart() {
         if (products.isEmpty()) {
             System.out.println("El carrito está vacío.");
         } else {
+            System.out.println("|---------------------------------------|");
             System.out.println("Productos en el carrito:");
+            System.out.println("|---------------------------------------|");
             for (Product product : products) {
                 System.out.println(product);
             }
@@ -95,10 +99,10 @@ public class Practica1 {
 
     public Practica1(User user) {
         this.user = user;
-        products.add(new Product(1, "Collar para perro", 600));
-        products.add(new Product(2, "Juguete de goma", 100));
-        products.add(new Product(3, "Jabón para perro", 400));
-        products.add(new Product(3, "Denta-sticks", 200));
+        products.add(new Product(1, "Italika ", 60000));
+        products.add(new Product(2, "Lavadoras", 9500));
+        products.add(new Product(3, "Jabón Zote", 400));
+        products.add(new Product(4, "Comedor integrado", 20000));
     }
 
     public void showProducts() {
@@ -120,8 +124,8 @@ public class Practica1 {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("---------------------------------------------------------------------------");
-        System.out.println("Bienvenido al E-Commerce Padalustro");
-        System.out.println("Necesitamos su nombre para generar el ticket.");
+        System.out.println("Bienvenido al E-Commerce Pada");
+        System.out.println("Necesitamos su nombre para facturar.");
         System.out.print("¿Como se llama?: ");
         String userName = scanner.nextLine();
         User user = new User(userName);
@@ -129,7 +133,7 @@ public class Practica1 {
 
         while (true) {
             System.out.println("\nMenú:");
-            System.out.println("1. Ver productos de mascotas");
+            System.out.println("1. Tienda departamental");
             System.out.println("2. Añadir producto al carrito");
             System.out.println("3. Ver carrito");
             System.out.println("4. Realizar compra");
