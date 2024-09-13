@@ -1,10 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
-
-//coopel mejora tu vida 
-
+// Clase Producto
 class Product {
     private int id;
     private String name;
@@ -14,10 +11,6 @@ class Product {
         this.id = id;
         this.name = name;
         this.price = price;
-    }
-
-    public int getId() {
-        return id;
     }
 
     public String getName() {
@@ -34,6 +27,28 @@ class Product {
     }
 }
 
+// Clase Carrito
+class Cart {
+    private List<Product> products;
+
+    public Cart() {
+        this.products = new ArrayList<>();
+    }
+
+    public void addProduct(Product product) {
+        products.add(product);
+    }
+
+    public double checkout() {
+        double total = 0;
+        for (Product p : products) {
+            total += p.getPrice();
+        }
+        return total;
+    }
+}
+
+// Clase Usuario
 class User {
     private String name;
     private Cart cart;
@@ -51,124 +66,85 @@ class User {
         return cart;
     }
 }
-//carrito
-class Cart {
-    private List<Product> products;
 
-    public Cart() {
-        this.products = new ArrayList<>();
+// Clase Hilo para simular una compra
+class CompraHilo extends Thread {
+    private User user;
+    private Product product;
+
+    public CompraHilo(User user, Product product) {
+        this.user = user;
+        this.product = product;
     }
 
-    public void addProduct(Product product) {
-        products.add(product);
-        System.out.println("Producto añadido al carrito: " + product.getName());
-    }
-//ver lo que hay en el carrito
-    public void viewCart() {
-        if (products.isEmpty()) {
-            System.out.println("El carrito está vacío.");
-        } else {
-            System.out.println("|---------------------------------------|");
-            System.out.println("Productos en el carrito:");
-            System.out.println("|---------------------------------------|");
-            for (Product product : products) {
-                System.out.println(product);
-            }
+    @Override
+    public void run() {
+        System.out.println(user.getName() + " está agregando " + product.getName() + " al carrito.");
+        try {
+            Thread.sleep(1000); // Simula el tiempo que tarda en agregar un producto al carrito
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-    }
 
-    public void checkout() {
-        if (products.isEmpty()) {
-            System.out.println("El carrito está vacío");
-        } else {
-            double total = 0;
-            System.out.println("Procesando compra.............");
-            for (Product product : products) {
-                total += product.getPrice();
-            }
-            System.out.println("Esto es lo que vas a pagar: $" + total);
-            products.clear();
-            System.out.println("La compra se realizo con éxito............................");
-        }
+        user.getCart().addProduct(product);
+        System.out.println(user.getName() + " ha agregado " + product.getName() + " al carrito.");
     }
 }
 
-public class Practica1 {
-    private List<Product> products = new ArrayList<>();
+// Clase Hilo para notificar al usuario cuando la compra haya finalizado
+class NotificacionHilo extends Thread {
     private User user;
 
-    public Practica1(User user) {
+    public NotificacionHilo(User user) {
         this.user = user;
-        products.add(new Product(1, "Italika ", 60000));
-        products.add(new Product(2, "Lavadoras", 9500));
-        products.add(new Product(3, "Jabón Zote", 400));
-        products.add(new Product(4, "Comedor integrado", 20000));
     }
 
-    public void showProducts() {
-        System.out.println("Estos son los productos disponibles:");
-        for (Product product : products) {
-            System.out.println(product);
+    @Override
+    public void run() {
+        System.out.println(user.getName() + " está procesando la compra.");
+        try {
+            Thread.sleep(2000); // Simula el tiempo que tarda en procesar la compra
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-    }
 
-    public Product getProductById(int id) {
-        for (Product product : products) {
-            if (product.getId() == id) {
-                return product;
-            }
-        }
-        return null;
+        double total = user.getCart().checkout();
+        System.out.println("Compra de " + user.getName() + " completada. Total: $" + total);
+        System.out.println("Notificación: Gracias por tu compra, " + user.getName() + "!");
     }
+}
 
+
+public class Practica1 {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("---------------------------------------------------------------------------");
-        System.out.println("Bienvenido al E-Commerce Pada");
-        System.out.println("Necesitamos su nombre para facturar.");
-        System.out.print("¿Como se llama?: ");
-        String userName = scanner.nextLine();
-        User user = new User(userName);
-        Practica1 store = new Practica1(user);
+        // Crear productos
+        Product p1 = new Product(1, "Laptop", 800);
+        Product p2 = new Product(2, "Smartphone", 500);
 
-        while (true) {
-            System.out.println("\nMenú:");
-            System.out.println("1. Tienda departamental");
-            System.out.println("2. Añadir producto al carrito");
-            System.out.println("3. Ver carrito");
-            System.out.println("4. Realizar compra");
-            System.out.println("5. Salir");
-            System.out.print("Seleccione una opción: ");
-            int option = scanner.nextInt();
+        // Crear usuarios
+        User user1 = new User("Juan");
+        User user2 = new User("Maria");
 
-            switch (option) {
-                case 1:
-                    store.showProducts();
-                    break;
-                case 2:
-                    System.out.print("Ingrese el ID del producto que desea añadir al carrito: ");
-                    int productId = scanner.nextInt();
-                    Product product = store.getProductById(productId);
-                    if (product != null) {
-                        user.getCart().addProduct(product);
-                    } else {
-                        System.out.println("Producto no encontrado.");
-                    }
-                    break;
-                case 3:
-                    user.getCart().viewCart();
-                    break;
-                case 4:
-                    user.getCart().checkout();
-                    break;
-                case 5:
-                    System.out.println("Gracias por comprar en E-Commerce Padalustro..........");
-                    scanner.close();
-                    return;
-                default:
-                    System.out.println("Opción invalida");
-                    break;
-            }
+        // Crear e iniciar hilos para agregar productos
+        CompraHilo compraHilo1 = new CompraHilo(user1, p1);
+        CompraHilo compraHilo2 = new CompraHilo(user2, p2);
+
+        compraHilo1.start();
+        compraHilo2.start();
+
+        // Esperar a que ambos hilos terminen de agregar productos
+        try {
+            compraHilo1.join();
+            compraHilo2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+
+        // Crear e iniciar hilos de notificación una vez que la compra se haya realizado
+        NotificacionHilo notificacionHilo1 = new NotificacionHilo(user1);
+        NotificacionHilo notificacionHilo2 = new NotificacionHilo(user2);
+
+        notificacionHilo1.start();
+        notificacionHilo2.start();
     }
 }
