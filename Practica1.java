@@ -1,150 +1,181 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-// Clase Producto
-class Product {
-    private int id;
-    private String name;
-    private double price;
+// Clase Cliente
+class Cliente {
+    private String nombre;
+    private String direccion;
 
-    public Product(int id, String name, double price) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
+    public Cliente(String nombre, String direccion) {
+        this.nombre = nombre;
+        this.direccion = direccion;
     }
 
-    public String getName() {
-        return name;
+    public String getNombre() {
+        return nombre;
     }
 
-    public double getPrice() {
-        return price;
+    public String getDireccion() {
+        return direccion;
+    }
+}
+
+// Clase Pedido
+class Pedido {
+    private int numero;
+    private String descripcion;
+    private List<String> articulos;
+    private Cliente cliente;
+
+    public Pedido(int numero, String descripcion, Cliente cliente) {
+        this.numero = numero;
+        this.descripcion = descripcion;
+        this.articulos = new ArrayList<>();
+        this.cliente = cliente;
+    }
+
+    public void agregarArticulo(String articulo) {
+        articulos.add(articulo);
+    }
+
+    public List<String> getArticulos() {
+        return articulos;
+    }
+
+    public Cliente getCliente() {
+        return cliente;
     }
 
     @Override
     public String toString() {
-        return "ID: " + id + " | Nombre: " + name + " | Precio: $" + price;
+        return "Pedido #" + numero + " (" + descripcion + ") para " + cliente.getNombre();
     }
 }
 
-// Clase Carrito
-class Cart {
-    private List<Product> products;
+// Clase Pago
+class Pago {
+    private int numero;
+    private Pedido pedido;
+    private String metodoPago;
+    private double total;
 
-    public Cart() {
-        this.products = new ArrayList<>();
+    public Pago(int numero, Pedido pedido, String metodoPago, double total) {
+        this.numero = numero;
+        this.pedido = pedido;
+        this.metodoPago = metodoPago;
+        this.total = total;
     }
 
-    public void addProduct(Product product) {
-        products.add(product);
+    public Pedido getPedido() {
+        return pedido;
     }
 
-    public double checkout() {
-        double total = 0;
-        for (Product p : products) {
-            total += p.getPrice();
-        }
+    public double getTotal() {
         return total;
     }
-}
 
-// Clase Usuario
-class User {
-    private String name;
-    private Cart cart;
-
-    public User(String name) {
-        this.name = name;
-        this.cart = new Cart();
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Cart getCart() {
-        return cart;
+    @Override
+    public String toString() {
+        return "Pago #" + numero + " para el " + pedido.toString() + " con metodo de pago: " + metodoPago + ". Total: $" + total;
     }
 }
 
-// Clase Hilo para simular una compra
-class CompraHilo extends Thread {
-    private User user;
-    private Product product;
+// Clase Notificación
+class Notiicacion {
+    private int numero;
+    private Pedido pedido;
+    private String guia;
+    private String fechaEntrega;
+    private String correo;
 
-    public CompraHilo(User user, Product product) {
-        this.user = user;
-        this.product = product;
+    public Notiicacion(int numero, Pedido pedido, String guia, String fechaEntrega, String correo) {
+        this.numero = numero;
+        this.pedido = pedido;
+        this.guia = guia;
+        this.fechaEntrega = fechaEntrega;
+        this.correo = correo;
+    }
+
+    @Override
+    public String toString() {
+        return "Notificacion #" + numero + ": Pedido #" + pedido.toString() + " sera entregado el " + fechaEntrega + ". Se envio a " + correo;
+    }
+}
+
+// Clase Hilo para el proceso completo 
+class ClienteHilo extends Thread {
+    private int clienteId;
+    private List<String> articulosDisponibles;
+
+    public ClienteHilo(int clienteId, List<String> articulosDisponibles) {
+        this.clienteId = clienteId;
+        this.articulosDisponibles = articulosDisponibles;
     }
 
     @Override
     public void run() {
-        System.out.println(user.getName() + " está agregando " + product.getName() + " al carrito.");
+        // Crear cliente
+        Cliente cliente = new Cliente("Cliente-" + clienteId, "Direccion-" + clienteId);
+
+        // Crear un pedido
+        Pedido pedido = new Pedido(clienteId, "Pedido de Cliente-" + clienteId, cliente);
+        Random random = new Random();
+        int articuloIndex = random.nextInt(articulosDisponibles.size());  // Elegir un articulo aleatorio
+        String articulo = articulosDisponibles.get(articuloIndex);
+
+        pedido.agregarArticulo(articulo);
+        System.out.println(cliente.getNombre() + " ha realizado un " + pedido.toString() + " con el articulo: " + articulo);
+
+        //el pago
         try {
-            Thread.sleep(1000); // Simula el tiempo que tarda en agregar un producto al carrito
+            Thread.sleep(2000); //el tiempo de procesamiento del pago
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        user.getCart().addProduct(product);
-        System.out.println(user.getName() + " ha agregado " + product.getName() + " al carrito.");
+        double total = random.nextDouble() * 1000;  //un total aleatorio
+        Pago pago = new Pago(clienteId, pedido, "Tarjeta de Credito", total);
+        System.out.println(pago.toString());
+
+        //notificacion
+        Notiicacion notiicacion = new Notiicacion(clienteId, pedido, "Guia-" + clienteId, "2024-12-01", "cliente" + clienteId + "@correo.com");
+        System.out.println(notiicacion.toString());
     }
 }
 
-// Clase Hilo para notificar al usuario cuando la compra haya finalizado
-class NotificacionHilo extends Thread {
-    private User user;
-
-    public NotificacionHilo(User user) {
-        this.user = user;
-    }
-
-    @Override
-    public void run() {
-        System.out.println(user.getName() + " está procesando la compra.");
-        try {
-            Thread.sleep(2000); // Simula el tiempo que tarda en procesar la compra
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        double total = user.getCart().checkout();
-        System.out.println("Compra de " + user.getName() + " completada. Total: $" + total);
-        System.out.println("Notificación: Gracias por tu compra, " + user.getName() + "!");
-    }
-}
-
-
+// Clase principal
 public class Practica1 {
     public static void main(String[] args) {
-        // Crear productos
-        Product p1 = new Product(1, "Laptop", 800);
-        Product p2 = new Product(2, "Smartphone", 500);
+        // Crea una lista de artículos disponibles en la tienda
+        List<String> articulosDisponibles = new ArrayList<>();
+        articulosDisponibles.add("Laptop");
+        articulosDisponibles.add("Smartphone");
+        articulosDisponibles.add("Tablet");
+        articulosDisponibles.add("Audífonos");
 
-        // Crear usuarios
-        User user1 = new User("Juan");
-        User user2 = new User("Maria");
+        // Crea e iniciar hilos para 5 clientes
+        int numClientes = 5;  // numero de clientes
+        List<ClienteHilo> hilosClientes = new ArrayList<>();
 
-        // Crear e iniciar hilos para agregar productos
-        CompraHilo compraHilo1 = new CompraHilo(user1, p1);
-        CompraHilo compraHilo2 = new CompraHilo(user2, p2);
-
-        compraHilo1.start();
-        compraHilo2.start();
-
-        // Esperar a que ambos hilos terminen de agregar productos
-        try {
-            compraHilo1.join();
-            compraHilo2.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        for (int i = 1; i <= numClientes; i++) {
+            ClienteHilo hilo = new ClienteHilo(i, articulosDisponibles);  // Pasamos el ID de cliente y la lista de articulos
+            hilosClientes.add(hilo);
+            hilo.start();  // Inicia el hilo 
         }
 
-        // Crear e iniciar hilos de notificación una vez que la compra se haya realizado
-        NotificacionHilo notificacionHilo1 = new NotificacionHilo(user1);
-        NotificacionHilo notificacionHilo2 = new NotificacionHilo(user2);
+        // Esperar a que todos terminen
+        for (ClienteHilo hilo : hilosClientes) {
+            try {
+                hilo.join();  // Espera a que cada uno termine
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
-        notificacionHilo1.start();
-        notificacionHilo2.start();
+        System.out.println("Todos los clientes han completado sus pedidos.");
     }
 }
+
+
+//saludos chavales
